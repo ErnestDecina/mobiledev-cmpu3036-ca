@@ -1,87 +1,134 @@
 package com.ernestjohndecina.memyselfandi;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Button;
 
 import com.ernestjohndecina.memyselfandi.controller.DiaryEntry;
-import com.ernestjohndecina.memyselfandi.controller.DiaryPostImage;
-import com.ernestjohndecina.memyselfandi.model.DiaryEntryModel;
+import com.ernestjohndecina.memyselfandi.controller.FileInputOutputController;
+import com.ernestjohndecina.memyselfandi.data.Database;
+import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    // Private Variables
-    private RecyclerView recylerView;
-    private ArrayList<DiaryEntryModel> testDiaryInput;
-    // private DiaryPostImage diaryPostImage;
+
+
+    // Variables
+    private List<PostModal> testDiaryInput;
     private DiaryEntry diaryEntry;
-    private DiaryPostImage diaryPostImage;
+
+    private ExecutorService executorService;
+
+    private Database database;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        setViews();
-        setTestData();
+        createDirectory();
+        setThreadService();
+        setDatabase();
+        loadDiaryPosts();
         setUpRecyclerView();
+        setViews();
+    }
 
+    private void createDirectory() {
+        try {
+            getExternalFilesDir(null);
+            String root = getExternalFilesDir("").getAbsolutePath();//get external storage
+            Log.d("Debug", root);
 
+            File myDir = new File(root + "/test"+"/posts");//create directory and subfolder
+            File dir= new File(root + "/test"+"/users"); //create subfolder
 
+            if(myDir.exists()) {
+                Log.d("Debug", "Folder /test/posts Exists");
+                return;
+            };
 
+            if(dir.exists()) {
+                Log.d("Debug", "Folder /test/users Exists");
+                return;
+            };
+
+            myDir.mkdirs();
+            dir.mkdirs();
+        } catch (Exception e) {
+            Log.d("Debug", e.toString());
+        }
+
+    }
+
+    private void setThreadService() {
+        executorService = new ThreadPoolExecutor(
+                4,
+                10,
+                5L,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>()
+        );
+    }
+
+    private void setDatabase() {
+        database = new Database(
+                this.getApplicationContext(),
+                executorService
+        );
+    }
+
+    public void loadDiaryPosts() {
+        try {
+            testDiaryInput = database.selectAllPosts().get();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setViews() {
-        this.recylerView = (RecyclerView) findViewById(R.id.diaryPost);
+        Button homeButton = (Button) findViewById(R.id.homeButton);
+        Button profileButton = (Button) findViewById(R.id.profileButton);
+        Button createPostButton = (Button) findViewById(R.id.createPostButton);
+
+        // Private Variables
+        MainLayout mainLayout = new MainLayout(
+                this,
+                executorService,
+                database,
+                homeButton,
+                createPostButton,
+                profileButton,
+                diaryEntry,
+                testDiaryInput
+        );
+
     } // End setViews()
 
-    private void setTestData() {
-        testDiaryInput = new ArrayList<DiaryEntryModel>();
-
-        ArrayList<Integer> images1 = new ArrayList<>();
-        images1.add(R.drawable.image_0);
-
-        ArrayList<Float> location = new ArrayList<>();
-        location.add(0.41f);
-        location.add(0.41f);
-        location.add(0.41f);
-
-
-        testDiaryInput.add(new DiaryEntryModel("Test 1 Caption Text", images1, "Address 1", location));
-
-        ArrayList<Integer> images2 = new ArrayList<>();
-        images2.add(R.drawable.image_1);
-        images2.add(R.drawable.image_2);
-        ArrayList<Float> location1 = new ArrayList<>();
-        location1.add(0.41f);
-        location1.add(0.41f);
-        location1.add(0.41f);
-        testDiaryInput.add(new DiaryEntryModel("Test 2 Caption Text", images2, "Address 2", location1));
-
-        ArrayList<Integer> images3 = new ArrayList<>();
-        images3.add(R.drawable.image_0);
-        images3.add(R.drawable.image_1);
-        images3.add(R.drawable.image_2);
-        ArrayList<Float> location2 = new ArrayList<>();
-        location2.add(0.41f);
-        location2.add(0.41f);
-        location2.add(0.41f);
-        testDiaryInput.add(new DiaryEntryModel("Test 3 Caption Text", images3, "Address 3", location2));
-
-        ArrayList<Integer> images4 = new ArrayList<>();
-        images4.add(R.drawable.image_1);
-        images4.add(R.drawable.image_0);
-        images4.add(R.drawable.image_2);
-        ArrayList<Float> location3 = new ArrayList<>();
-        location3.add(0.41f);
-        location3.add(0.41f);
-        location3.add(0.41f);
-        testDiaryInput.add(new DiaryEntryModel("Test 4 Caption Text", images4, "Address 4", location3));
-    }
-
     private void setUpRecyclerView() {
-        diaryEntry = new DiaryEntry(this, recylerView, testDiaryInput);
+        // Views
+        RecyclerView recylerView = (RecyclerView) findViewById(R.id.diaryPost);
+        try {
+            diaryEntry = new DiaryEntry(this, executorService, recylerView, testDiaryInput);
+        } catch (Exception error) {
+            Log.e("Error", error.getMessage());
+        }
     } // End setUpRecyclerView()
+
 }

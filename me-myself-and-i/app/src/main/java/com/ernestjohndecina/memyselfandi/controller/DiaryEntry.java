@@ -1,32 +1,65 @@
 package com.ernestjohndecina.memyselfandi.controller;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
-import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.ernestjohndecina.memyselfandi.adapter.DiaryEntryAdapter;
-import com.ernestjohndecina.memyselfandi.model.DiaryEntryModel;
+import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
 
 public class DiaryEntry {
     private Context context;
+    private ExecutorService executorService;
+    private Handler mainHandler;
     private RecyclerView recylerView;
     private DiaryEntryAdapter diaryEntryAdapter;
-    private ArrayList<DiaryEntryModel> testDiaryInput;
+    private List<PostModal> testDiaryInput;
     private LinearLayoutManager linearLayoutManager;
 
-    public DiaryEntry(Context context, RecyclerView recylerView, ArrayList<DiaryEntryModel> testDiaryInput) {
+    public DiaryEntry(Context context, ExecutorService executorService, RecyclerView recylerView, List<PostModal> testDiaryInput) {
         this.context = context;
+        this.executorService = executorService;
+        this.mainHandler = new Handler(Looper.getMainLooper());
         this.recylerView = recylerView;
         this.testDiaryInput = testDiaryInput;
 
-        this.diaryEntryAdapter = new DiaryEntryAdapter(this.testDiaryInput, context);
-        this.linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        // Create Adapter
+        this.diaryEntryAdapter = new DiaryEntryAdapter(this.testDiaryInput, context, executorService);
 
+        // Layout Manager
+        this.linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        this.linearLayoutManager.setReverseLayout(true);
+        this.linearLayoutManager.setStackFromEnd(true);
+
+        // Set Recycler View
         recylerView.setLayoutManager(this.linearLayoutManager);
+        this.recylerView.setHasFixedSize(true);
+        this.recylerView.setItemViewCacheSize(5);
         this.recylerView.setAdapter(this.diaryEntryAdapter);
     } // End Constructor
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateAdataper() {
+        context.getMainExecutor().execute(() -> {
+            this.diaryEntryAdapter.notifyItemInserted(testDiaryInput.size());
+        });
+//        mainHandler.post(() -> {
+//            this.diaryEntryAdapter.notifyItemInserted(testDiaryInput.size());
+//        });
+    }
+
+
+    public void addArrayList(PostModal post) {
+        this.testDiaryInput.add(post);
+    }
 }
