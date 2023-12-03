@@ -2,7 +2,11 @@ package com.ernestjohndecina.memyselfandi.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -43,13 +47,20 @@ public class DiaryEntryImageGridAdapter extends ArrayAdapter<PostModal> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         @SuppressLint("ViewHolder") View listitemView = LayoutInflater.from(getContext()).inflate(R.layout.diary_entry_image_grid, parent, false);
         listitemView.setLayoutParams(new GridView.LayoutParams(GridView.AUTO_FIT, 400));
-        Log.d("DEBUG GRID", String.valueOf(position));
+
         executorService.execute(() -> {
             ImageView courseIV = listitemView.findViewById(R.id.imageView);
-            Drawable image = Drawable.createFromPath("/storage/emulated/0/Android/data/com.ernestjohndecina.memyselfandi/files/test/posts/posts_" + (position + 2) + "/image_0.jpeg");
+            BitmapDrawable image = (BitmapDrawable) Drawable.createFromPath("/storage/emulated/0/Android/data/com.ernestjohndecina.memyselfandi/files/test/posts/posts_" + (position + 2) + "/image_0.jpeg");
+
+
+            Bitmap thumbImage = ThumbnailUtils.extractThumbnail(
+                    image.getBitmap(),
+                    250,
+                    250
+            );
 
             mainHandler.post(() -> {
-                courseIV.setImageDrawable(image);
+                courseIV.setImageBitmap(thumbImage);
             });
         });
 

@@ -84,7 +84,6 @@ public class DiaryEntryAdapter extends RecyclerView.Adapter<DiaryEntryAdapter.Vi
         private TextView diaryPostCaption;
         private TextView diaryPostAddress;
         private RecyclerView imageRecyclerView;
-
         private Boolean state = false;
 
 

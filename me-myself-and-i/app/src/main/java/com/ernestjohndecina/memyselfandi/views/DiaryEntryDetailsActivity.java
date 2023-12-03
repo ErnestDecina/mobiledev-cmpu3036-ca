@@ -1,5 +1,9 @@
 package com.ernestjohndecina.memyselfandi.views;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -9,11 +13,11 @@ import androidx.recyclerview.widget.SnapHelper;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.ernestjohndecina.memyselfandi.R;
 import com.ernestjohndecina.memyselfandi.adapter.DiaryEntryEditDetailsImageAdapter;
@@ -25,10 +29,15 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity {
     ArrayList<Uri> uriArrayList;
     DiaryEntryEditDetailsImageAdapter diaryEntryEditDetailsImageAdapter;
 
+    private ActivityResultLauncher<Intent> googleMapsActivityLauncher;
+    Intent googleMaps;
+
     RecyclerView recyclerView;
     EditText caption;
-    EditText address;
     Button postDiaryEntryButton;
+    Button setLocationButton;
+
+    PostModal new_post;
 
 
     @Override
@@ -40,14 +49,17 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity {
 
         setViews();
         setRecyclerView();
+        setGoogleMapsActivityLauncher();
         setOnclickListeners();
+
+        new_post = new PostModal();
     }
 
     private void setViews() {
         recyclerView = findViewById(R.id.recyclerView);
         caption = findViewById(R.id.captionTextEdit);
-        address = findViewById(R.id.addressLocationEditText);
         postDiaryEntryButton = findViewById(R.id.postDiaryEntryButton);
+        setLocationButton = findViewById(R.id.setLocationButton);
     }
 
 
@@ -70,13 +82,13 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity {
     }
 
     private void setOnclickListeners() {
+        setLocationButton.setOnClickListener(v -> getLocation());
         postDiaryEntryButton.setOnClickListener(v -> postData());
     }
 
     private void postData() {
         Intent resultIntent = new Intent();
         String caption = String.valueOf(this.caption.getText());
-        String address = String.valueOf(this.address.getText());
 
         ArrayList<String> imagesUriString = new ArrayList<>();
 
@@ -84,14 +96,33 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity {
             imagesUriString.add(uri.toString());
         }
 
-        PostModal new_post = new PostModal();
+        // PostModal new_post = new PostModal();
         new_post.caption = caption;
-        new_post.address = address;
         new_post.imagePaths = imagesUriString;
 
         resultIntent.putExtra("NEW_POST_DETAILS", new_post);
         resultIntent.putExtra("NEW_POST_IMAGES", uriArrayList);
         setResult(Activity.RESULT_OK, resultIntent);
         finish();
+    }
+
+    private void getLocation() {
+        Log.d("DEBUG", "clicked location");
+        googleMapsActivityLauncher.launch(googleMaps);
+    }
+
+    private void setGoogleMapsActivityLauncher() {
+        googleMaps = new Intent(this, MapsActivity.class);
+        googleMapsActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                data -> {
+                    Intent dataIntent = data.getData();
+                    Bundle bundle = dataIntent.getExtras();
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        new_post.address = bundle.getSerializable("ADDRESS", String.class);
+                    }
+    }
+        );
     }
 }

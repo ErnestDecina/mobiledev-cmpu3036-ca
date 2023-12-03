@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -66,7 +68,7 @@ public class DiaryEntryImageAdapter extends RecyclerView.Adapter<DiaryEntryImage
         executorService.execute(() -> {
             Log.d("DEBUG", String.valueOf(index));
             holder.setText( (position + 1) + "/" + getItemCount() );
-            Drawable image = Drawable.createFromPath("/storage/emulated/0/Android/data/com.ernestjohndecina.memyselfandi/files/test/posts/posts_" + (index + 1) + "/image_"+ (position) +".jpeg");
+            BitmapDrawable image = (BitmapDrawable) Drawable.createFromPath("/storage/emulated/0/Android/data/com.ernestjohndecina.memyselfandi/files/test/posts/posts_" + (index + 1) + "/image_"+ (position) +".jpeg");
             holder.setImage(image);
         });
     }
@@ -93,9 +95,15 @@ public class DiaryEntryImageAdapter extends RecyclerView.Adapter<DiaryEntryImage
             indexNumberTextView = itemView.findViewById(R.id.indexNumberTextView);
         }
 
-        public void setImage(Drawable image) {
+        public void setImage(BitmapDrawable image) {
+            Bitmap thumbImage = ThumbnailUtils.extractThumbnail(
+                    image.getBitmap(),
+                    500,
+                    500
+            );
+
             context.getMainExecutor().execute(() -> {
-                diaryPostImage.setImageDrawable(image);
+                diaryPostImage.setImageBitmap(thumbImage);
             });
         }
 
