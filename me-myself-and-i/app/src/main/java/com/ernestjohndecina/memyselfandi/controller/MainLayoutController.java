@@ -1,31 +1,30 @@
-package com.ernestjohndecina.memyselfandi;
+package com.ernestjohndecina.memyselfandi.controller;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.fragment.app.FragmentManager;
 
 
-import com.ernestjohndecina.memyselfandi.controller.DiaryEntry;
+import com.ernestjohndecina.memyselfandi.R;
 import com.ernestjohndecina.memyselfandi.controller.FileInputOutputController;
 import com.ernestjohndecina.memyselfandi.data.Database;
 import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
+import com.ernestjohndecina.memyselfandi.views.MainActivity;
+import com.ernestjohndecina.memyselfandi.views.fragments.CreatePostFragment;
+import com.ernestjohndecina.memyselfandi.views.fragments.HomeFragment;
+import com.ernestjohndecina.memyselfandi.views.fragments.ProfileFragment;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
-public class MainLayout {
+public class MainLayoutController {
     Context context;
+    FragmentManager fragmentManager;
     ExecutorService executorService;
     Database database;
     MainActivity activity;
@@ -37,6 +36,11 @@ public class MainLayout {
     private Intent homeIntent;
     private final Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
     private Intent profileIntent;
+
+    // Fragments
+    HomeFragment homeFragment;
+    CreatePostFragment createPostFragement;
+    ProfileFragment profileFragement;
 
 
 
@@ -50,17 +54,15 @@ public class MainLayout {
 
     // TEST
     Handler mainHandler;
-    DiaryEntry diaryEntry;
     List<PostModal> testDiaryInput;
 
-    MainLayout(
+    public MainLayoutController(
             MainActivity mainActivity,
             ExecutorService executorService,
             Database database,
             Button homeButton,
             Button createPostButton,
             Button profileButton,
-            DiaryEntry diaryEntry,
             List<PostModal> testDiaryInput
     ) {
         this.activity = (MainActivity) mainActivity;
@@ -71,18 +73,30 @@ public class MainLayout {
         this.createPostButton = createPostButton;
         this.profileButton = profileButton;
 
+
+
         // TEST
+        this.setFragmentManager();
         this.mainHandler = new Handler(Looper.getMainLooper());
-        this.diaryEntry = diaryEntry;
         this.testDiaryInput = testDiaryInput;
 
+
+
         // Setup Intents
-        setHomeIntent();
+
         setFileInputOutputController();
+
         setGalleryIntent();
+        showGalleryIntent();
         setOnClickListeners();
         setProfileIntent();
+        showProfileIntent();
+        setHomeIntent();
+        showHomeIntent();
+    }
 
+    private void setFragmentManager() {
+        this.fragmentManager = activity.getSupportFragmentManager();
     }
 
     private void setOnClickListeners() {
@@ -97,11 +111,7 @@ public class MainLayout {
     }
 
     private void setCreatePostButtonOnClick() {
-        try {
-            showGalleryIntent();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        showGalleryIntent();
     }
 
 
@@ -109,19 +119,23 @@ public class MainLayout {
     // Intents
     // Home
     private void setHomeIntent() {
-        PackageManager pm = context.getPackageManager();
-        homeIntent = pm.getLaunchIntentForPackage(context.getPackageName());
-
-
-        // homeIntent = new Intent(context, MainActivity.class);
-        // homeIntent.addFlags(Intent.FLA);
-        // homeIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-        //homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if(homeFragment == null) {
+            homeFragment = HomeFragment.newInstance();
+            homeFragment.setExecutorService(executorService);
+            homeFragment.setDiaryInput(testDiaryInput);
+        }
     }
 
     private void showHomeIntent() {
-        activity.startActivity(homeIntent);
-        activity.finish();
+        this.fragmentManager
+                .beginTransaction()
+                .replace(
+                        R.id.fragmentContainerView,
+                        homeFragment
+                )
+                .setReorderingAllowed(true)
+                .addToBackStack(null)
+                .commit();
     }
 
     // Gallery
@@ -133,32 +147,46 @@ public class MainLayout {
     }
 
     private void setGalleryIntent() {
-        galleryIntent.setType("image/*");
-        galleryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        if(createPostFragement != null) return;
 
-        galleryIntentActivityResultLauncher = activity.registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new AddImages(context, database, executorService, diaryEntry, testDiaryInput)
-        );
+        createPostFragement = CreatePostFragment.newInstance();
+        createPostFragement.setDatabase(database);
+        createPostFragement.setDiaryInput(testDiaryInput);
+        createPostFragement.setExecutorService(executorService);
     }
 
 
 
-    private void showGalleryIntent() throws ExecutionException, InterruptedException {
-        executorService.execute(() ->
-                galleryIntentActivityResultLauncher.launch(Intent.createChooser(galleryIntent, "Select Pictures"))
-        );
-        activity.finish();
+    private void showGalleryIntent() {
+        this.fragmentManager
+                .beginTransaction()
+                .replace(
+                        R.id.fragmentContainerView,
+                        createPostFragement
+                )
+                .setReorderingAllowed(true)
+                .addToBackStack(null)
+                .commit();
     }
 
     // Profile
     private void setProfileIntent() {
-        profileIntent = new Intent(context, ProfileActivity.class);
-        profileIntent.putExtra(Intent.EXTRA_INTENT, homeIntent);
+        if(profileFragement == null) {
+            profileFragement = ProfileFragment.newInstance();
+            profileFragement.setDiaryInput(testDiaryInput);
+            profileFragement.setExecutorService(executorService);
+        }
     }
 
     private void showProfileIntent() {
-        activity.startActivity(profileIntent);
-        activity.finish();
+        this.fragmentManager
+                .beginTransaction()
+                .replace(
+                        R.id.fragmentContainerView,
+                        profileFragement
+                )
+                .setReorderingAllowed(true)
+                .addToBackStack(null)
+                .commit();
     }
 }

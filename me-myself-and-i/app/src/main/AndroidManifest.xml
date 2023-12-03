@@ -19,10 +19,13 @@
         android:theme="@style/Theme.MeMyselfAndI"
         tools:targetApi="31">
         <activity
+            android:name=".views.DiaryEntryDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".views.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

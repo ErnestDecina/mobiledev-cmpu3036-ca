@@ -7,10 +7,11 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 @Entity(tableName = "posts")
-public class PostModal {
+public class PostModal implements Serializable {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "post_id")
     public int postId;

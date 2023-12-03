@@ -2,16 +2,13 @@ package com.ernestjohndecina.memyselfandi.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,39 +17,26 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.ernestjohndecina.memyselfandi.R;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
-public class DiaryEntryImageAdapter extends RecyclerView.Adapter<DiaryEntryImageAdapter.ViewHolder> {
-    private final ArrayList<String> diaryPost;
+public class DiaryEntryEditDetailsImageAdapter extends RecyclerView.Adapter<DiaryEntryEditDetailsImageAdapter.ViewHolder> {
+    private final ArrayList<Uri> uriArrayList;
     private final Context context;
-    private ExecutorService executorService;
-
-
-    private final Integer index;
-    private  Integer position = 0;
-
-
-
-    public DiaryEntryImageAdapter(ArrayList<String> diaryPost, Context context, ExecutorService executorService, Integer index) {
-        this.diaryPost = diaryPost;
+    public DiaryEntryEditDetailsImageAdapter(ArrayList<Uri> uriArrayList, Context context) {
+        this.uriArrayList = uriArrayList;
         this.context = context;
-        this.executorService = executorService;
-        this.index = index;
-
     }
 
 
     @SuppressLint("SetTextI18n")
     @NonNull
     @Override
-    public DiaryEntryImageAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.diary_entry_image, parent, false);
 
         ViewHolder viewHolder = new ViewHolder(view , context);
@@ -62,25 +46,27 @@ public class DiaryEntryImageAdapter extends RecyclerView.Adapter<DiaryEntryImage
 
     @SuppressLint("SetTextI18n")
     @Override
-    public void onBindViewHolder(@NonNull DiaryEntryImageAdapter.ViewHolder holder, int position) {
-        executorService.execute(() -> {
-            Log.d("DEBUG", String.valueOf(index));
-            holder.setText( (position + 1) + "/" + getItemCount() );
-            Drawable image = Drawable.createFromPath("/storage/emulated/0/Android/data/com.ernestjohndecina.memyselfandi/files/test/posts/posts_" + (index + 1) + "/image_"+ (position) +".jpeg");
-            holder.setImage(image);
-        });
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.setText( (position + 1) + "/" + getItemCount() );
+
+        Bitmap image = null;
+        try {
+            image = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uriArrayList.get(position));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        holder.setImage(image);
     }
 
     @Override
     public int getItemCount() {
-        return diaryPost.size();
+        return uriArrayList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // on below line we are creating variable.
         private final ImageView diaryPostImage;
         private TextView indexNumberTextView;
-        private Boolean state = false;
         private Context context;
         Handler mainHander;
 
@@ -93,9 +79,9 @@ public class DiaryEntryImageAdapter extends RecyclerView.Adapter<DiaryEntryImage
             indexNumberTextView = itemView.findViewById(R.id.indexNumberTextView);
         }
 
-        public void setImage(Drawable image) {
+        public void setImage(Bitmap image) {
             context.getMainExecutor().execute(() -> {
-                diaryPostImage.setImageDrawable(image);
+                diaryPostImage.setImageBitmap(image);
             });
         }
 

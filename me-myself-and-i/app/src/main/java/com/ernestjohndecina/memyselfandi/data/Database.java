@@ -1,16 +1,12 @@
 package com.ernestjohndecina.memyselfandi.data;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.room.Room;
 
-import com.ernestjohndecina.memyselfandi.MainActivity;
 import com.ernestjohndecina.memyselfandi.data.dao.PostDao;
 import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;

@@ -1,19 +1,14 @@
-package com.ernestjohndecina.memyselfandi;
+package com.ernestjohndecina.memyselfandi.views;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 
-import com.ernestjohndecina.memyselfandi.controller.DiaryEntry;
-import com.ernestjohndecina.memyselfandi.controller.FileInputOutputController;
+import com.ernestjohndecina.memyselfandi.controller.MainLayoutController;
+import com.ernestjohndecina.memyselfandi.R;
+import com.ernestjohndecina.memyselfandi.controller.DiaryEntryController;
 import com.ernestjohndecina.memyselfandi.data.Database;
 import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
 
@@ -30,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Variables
     private List<PostModal> testDiaryInput;
-    private DiaryEntry diaryEntry;
+    private DiaryEntryController diaryEntry;
 
     private ExecutorService executorService;
 
@@ -42,13 +37,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // setFragmentManager();
         createDirectory();
         setThreadService();
         setDatabase();
         loadDiaryPosts();
-        setUpRecyclerView();
         setViews();
     }
+
 
     private void createDirectory() {
         try {
@@ -108,27 +104,15 @@ public class MainActivity extends AppCompatActivity {
         Button createPostButton = (Button) findViewById(R.id.createPostButton);
 
         // Private Variables
-        MainLayout mainLayout = new MainLayout(
+        MainLayoutController mainLayout = new MainLayoutController(
                 this,
                 executorService,
                 database,
                 homeButton,
                 createPostButton,
                 profileButton,
-                diaryEntry,
                 testDiaryInput
         );
 
     } // End setViews()
-
-    private void setUpRecyclerView() {
-        // Views
-        RecyclerView recylerView = (RecyclerView) findViewById(R.id.diaryPost);
-        try {
-            diaryEntry = new DiaryEntry(this, executorService, recylerView, testDiaryInput);
-        } catch (Exception error) {
-            Log.e("Error", error.getMessage());
-        }
-    } // End setUpRecyclerView()
-
 }

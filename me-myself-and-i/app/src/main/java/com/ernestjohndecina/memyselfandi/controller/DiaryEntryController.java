@@ -10,14 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import com.ernestjohndecina.memyselfandi.adapter.DiaryEntryAdapter;
 import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
 
-public class DiaryEntry {
+public class DiaryEntryController {
     private Context context;
     private ExecutorService executorService;
     private Handler mainHandler;
@@ -26,7 +23,7 @@ public class DiaryEntry {
     private List<PostModal> testDiaryInput;
     private LinearLayoutManager linearLayoutManager;
 
-    public DiaryEntry(Context context, ExecutorService executorService, RecyclerView recylerView, List<PostModal> testDiaryInput) {
+    public DiaryEntryController(Context context, ExecutorService executorService, RecyclerView recylerView, List<PostModal> testDiaryInput) {
         this.context = context;
         this.executorService = executorService;
         this.mainHandler = new Handler(Looper.getMainLooper());
@@ -50,12 +47,13 @@ public class DiaryEntry {
 
     @SuppressLint("NotifyDataSetChanged")
     public void updateAdataper() {
-        context.getMainExecutor().execute(() -> {
-            this.diaryEntryAdapter.notifyItemInserted(testDiaryInput.size());
-        });
-//        mainHandler.post(() -> {
-//            this.diaryEntryAdapter.notifyItemInserted(testDiaryInput.size());
+//        context.getMainExecutor().execute(() -> {
+//            this.diaryEntryAdapter.notifyItemInserted(testDiaryInput.size() + 1);
 //        });
+
+        mainHandler.post(() -> {
+            this.diaryEntryAdapter.notifyItemInserted(testDiaryInput.size() + 1);
+        });
     }
 
 
