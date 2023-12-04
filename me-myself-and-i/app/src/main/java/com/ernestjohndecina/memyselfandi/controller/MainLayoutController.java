@@ -86,12 +86,15 @@ public class MainLayoutController {
 
         setFileInputOutputController();
 
-        setGalleryIntent();
-        showGalleryIntent();
-        setOnClickListeners();
-        setProfileIntent();
-        showProfileIntent();
         setHomeIntent();
+        setGalleryIntent();
+        setProfileIntent();
+        
+
+        setOnClickListeners();
+
+        showGalleryIntent();
+        showProfileIntent();
         showHomeIntent();
     }
 
@@ -149,7 +152,7 @@ public class MainLayoutController {
     private void setGalleryIntent() {
         if(createPostFragement != null) return;
 
-        createPostFragement = CreatePostFragment.newInstance();
+        createPostFragement = CreatePostFragment.newInstance(homeFragment);
         createPostFragement.setDatabase(database);
         createPostFragement.setDiaryInput(testDiaryInput);
         createPostFragement.setExecutorService(executorService);

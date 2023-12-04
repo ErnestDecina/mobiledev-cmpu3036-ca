@@ -13,6 +13,7 @@ import com.ernestjohndecina.memyselfandi.data.Database;
 import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -93,6 +94,10 @@ public class MainActivity extends AppCompatActivity {
     public void loadDiaryPosts() {
         try {
             testDiaryInput = database.selectAllPosts().get();
+
+            if(testDiaryInput == null) {
+                testDiaryInput = new ArrayList<>();
+            }
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }

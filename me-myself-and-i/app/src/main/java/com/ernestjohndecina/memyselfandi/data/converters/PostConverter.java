@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import androidx.room.TypeConverter;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 
@@ -34,5 +35,18 @@ public class PostConverter {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @TypeConverter
+    public static ArrayList<Double> fromStringtoFloat(String value) {
+        Type listType = new TypeToken<ArrayList<Double>>() {}.getType();
+        return new Gson().fromJson(value, listType);
+    }
+
+    @TypeConverter
+    public static String fromArrayListFloat(ArrayList<Double> list) {
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        return json;
     }
 }

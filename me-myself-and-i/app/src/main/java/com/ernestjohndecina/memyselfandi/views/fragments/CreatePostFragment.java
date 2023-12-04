@@ -8,6 +8,8 @@ import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.provider.MediaStore;
 import android.util.Log;
@@ -37,12 +39,14 @@ public class CreatePostFragment extends Fragment {
     private ExecutorService executorService;
     private Database database;
     private List<PostModal> testDiaryInput;
-
+    private HomeFragment homeFragment;
 
     public CreatePostFragment() {}
 
-    public static CreatePostFragment newInstance() {
+    public static CreatePostFragment newInstance(HomeFragment homeFragment) {
         CreatePostFragment fragment = new CreatePostFragment();
+
+        fragment.homeFragment = homeFragment;
         return fragment;
     }
 
@@ -65,6 +69,14 @@ public class CreatePostFragment extends Fragment {
         );
 
         galleryIntentActivityResultLauncher.launch(galleryIntent);
+
+
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragmentContainerView, homeFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
         return view;
     }
 
@@ -85,6 +97,8 @@ public class CreatePostFragment extends Fragment {
                 new ActivityResultContracts.StartActivityForResult(),
                 addImages
         );
+
+
     }
 
     public void setExecutorService(ExecutorService executorService) {

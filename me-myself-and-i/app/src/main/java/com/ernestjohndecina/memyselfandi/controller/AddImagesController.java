@@ -17,7 +17,10 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.ernestjohndecina.memyselfandi.R;
 import com.ernestjohndecina.memyselfandi.data.Database;
 import com.ernestjohndecina.memyselfandi.data.entities.PostModal;
 import com.ernestjohndecina.memyselfandi.views.DiaryEntryDetailsActivity;

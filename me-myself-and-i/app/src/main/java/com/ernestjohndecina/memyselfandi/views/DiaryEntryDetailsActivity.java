@@ -121,6 +121,15 @@ public class DiaryEntryDetailsActivity extends AppCompatActivity {
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         new_post.address = bundle.getSerializable("ADDRESS", String.class);
+                        new_post.location = new ArrayList<Double>();
+
+                        double lat = bundle.getSerializable("LATITUDE", Double.class);
+                        double lon = bundle.getSerializable("LONGITUDE", Double.class);
+
+                        Log.d("TEST", String.valueOf(lat));
+
+                        new_post.location.add(lat);
+                        new_post.location.add(lon);
                     }
     }
         );

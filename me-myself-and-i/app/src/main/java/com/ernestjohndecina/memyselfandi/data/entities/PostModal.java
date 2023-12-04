@@ -28,6 +28,6 @@ public class PostModal implements Serializable {
     @ColumnInfo(name = "address")
     public String address;
 
-//     @ColumnInfo(name = "location")
-//     public ArrayList<Float> location;
+     @ColumnInfo(name = "location")
+     public ArrayList<Double> location;
 }

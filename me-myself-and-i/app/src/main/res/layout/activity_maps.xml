@@ -14,8 +14,10 @@
         android:layout_height="match_parent"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
+        map:layout_constraintHorizontal_bias="0.0"
         map:layout_constraintStart_toStartOf="parent"
         map:layout_constraintTop_toTopOf="parent"
+        map:layout_constraintVertical_bias="0.0"
         tools:context=".views.MapsActivity" />
 
     <Button
@@ -36,5 +38,15 @@
         android:layout_marginBottom="112dp"
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="105dp"
+        android:layout_height="96dp"
+        map:layout_constraintBottom_toTopOf="@+id/selectLocationButton"
+        map:layout_constraintEnd_toEndOf="parent"
+        map:layout_constraintStart_toStartOf="parent"
+        map:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
